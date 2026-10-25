@@ -1,0 +1,910 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="color-scheme" content="light dark">
+<title>食动养元 · 随机食谱 + 三段式锻炼</title>
+<style>
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    font-family:system-ui,-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+    background:#faf6f0;color:#3d3229;line-height:1.65;
+    -webkit-font-smoothing:antialiased;
+  }
+  .wrap{max-width:1080px;margin:0 auto;padding:0 18px;}
+
+  header{
+    background:linear-gradient(135deg,#b85c38 0%,#d08a5e 55%,#c9a227 100%);
+    color:#fff;padding:34px 0 30px;
+  }
+  header h1{margin:0;font-size:clamp(22px,4vw,30px);letter-spacing:.5px;}
+  header .sub{margin:6px 0 0;opacity:.92;font-size:14px;}
+
+  .weekbar{background:#fff;border-bottom:1px solid #e8ddd0;padding:12px 0;}
+  .weekbar .wrap{display:flex;align-items:center;gap:12px;flex-wrap:wrap;}
+  .weekbar-label{font-size:13px;color:#8a7b6c;}
+  .weeks{display:flex;gap:8px;flex-wrap:wrap;}
+  .week-btn{
+    border:1px solid #e0d2c2;background:#fdfaf6;color:#5c4d3e;
+    padding:7px 16px;border-radius:999px;cursor:pointer;font-size:14px;
+    font-family:inherit;transition:.18s;
+  }
+  .week-btn:hover{border-color:#c98a63;}
+  .week-btn.active{background:#b85c38;border-color:#b85c38;color:#fff;font-weight:600;}
+
+  .tabs{background:#fff;border-bottom:1px solid #e8ddd0;}
+  .tabs .wrap{display:flex;gap:4px;overflow-x:auto;}
+  .tab{
+    border:none;background:none;padding:14px 16px;font-size:15px;color:#8a7b6c;
+    cursor:pointer;border-bottom:3px solid transparent;white-space:nowrap;
+    font-family:inherit;transition:.18s;
+  }
+  .tab:hover{color:#b85c38;}
+  .tab.active{color:#b85c38;border-bottom-color:#b85c38;font-weight:600;}
+
+  .panel{display:none;padding:26px 0 64px;}
+  .panel.active{display:block;}
+
+  h2.sec{font-size:19px;margin:0 0 6px;color:#4a3a2c;}
+  .sec-sub{font-size:13.5px;color:#8a7b6c;margin:0 0 16px;}
+
+  .seg{
+    display:inline-flex;background:#f2ebe1;border-radius:999px;padding:3px;gap:2px;
+    margin:0 0 16px;flex-wrap:wrap;
+  }
+  .seg button{
+    border:none;background:none;padding:8px 16px;border-radius:999px;cursor:pointer;
+    font-size:14px;font-family:inherit;color:#7a6a5a;transition:.18s;
+  }
+  .seg button:hover{color:#b85c38;}
+  .seg button.active{background:#b85c38;color:#fff;font-weight:600;}
+
+  .randbar{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin:0 0 18px;}
+  .btn{
+    border:1px solid #d8c4b0;background:#fff;color:#a8542f;
+    padding:8px 18px;border-radius:999px;cursor:pointer;font-size:14px;
+    font-family:inherit;transition:.18s;
+  }
+  .btn:hover{background:#b85c38;border-color:#b85c38;color:#fff;}
+
+  .day-grid{
+    display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:14px;
+  }
+  .day-card{
+    background:#fff;border:1px solid #eee3d6;border-radius:14px;padding:14px 16px;
+    box-shadow:0 1px 2px rgba(120,90,60,.05);
+  }
+  .day-head{
+    font-weight:700;color:#b85c38;font-size:14px;margin-bottom:10px;
+    padding-bottom:8px;border-bottom:1px dashed #e8ddd0;
+    display:flex;justify-content:space-between;align-items:center;
+  }
+  .day-head .from{
+    font-size:11px;font-weight:600;color:#a06a45;background:#f2e7da;
+    padding:1px 8px;border-radius:999px;
+  }
+  .meal{display:flex;gap:8px;margin:7px 0;font-size:14px;}
+  .meal-tag{
+    flex:none;width:22px;height:22px;border-radius:6px;
+    display:flex;align-items:center;justify-content:center;
+    font-size:12px;font-weight:600;margin-top:1px;
+  }
+  .meal-tag.b{background:#fdf0d5;color:#a67c00;}
+  .meal-tag.l{background:#fbe4d5;color:#b85c38;}
+  .meal-tag.d{background:#e5ecdb;color:#5f7a45;}
+  .meal p{margin:0;}
+
+  .shop-list{
+    background:#fff;border:1px solid #eee3d6;border-radius:14px;overflow:hidden;
+    box-shadow:0 1px 2px rgba(120,90,60,.05);margin-bottom:20px;
+  }
+  .shop-item{
+    display:flex;justify-content:space-between;align-items:center;
+    padding:12px 16px;border-bottom:1px solid #f2ebe1;font-size:15px;
+  }
+  .shop-item:last-child{border-bottom:none;}
+  .shop-item span:first-child{color:#5c4d3e;}
+  .shop-item span:last-child{font-weight:600;color:#b85c38;font-size:16px;}
+
+  .acc-controls{display:flex;gap:10px;margin-bottom:16px;}
+  .acc-btn{
+    background:#fff;border:1px solid #d8c4b0;color:#8a7b6c;
+    padding:6px 14px;border-radius:8px;font-size:13px;cursor:pointer;font-family:inherit;
+  }
+  .acc-btn:hover{background:#f2ebe1;}
+  
+  .acc-item{
+    background:#fff;border:1px solid #eee3d6;border-radius:12px;
+    margin-bottom:12px;overflow:hidden;
+    box-shadow:0 1px 2px rgba(120,90,60,.05);
+  }
+  .acc-header{
+    padding:14px 16px;font-weight:600;font-size:15px;cursor:pointer;
+    display:flex;justify-content:space-between;align-items:center;
+    background:#fdfaf5;user-select:none;
+  }
+  .acc-icon{font-size:18px;color:#b85c38;transition:transform .3s;}
+  .acc-content{
+    display:none;padding:16px;border-top:1px solid #eee3d6;font-size:15px;line-height:1.7;
+  }
+  .acc-row{margin-bottom:12px;}
+  .acc-row:last-child{margin-bottom:0;}
+  .acc-row strong{color:#5c4d3e;display:inline-block;min-width:70px;}
+  
+  .acc-item.open .acc-header{background:#fbe4d5;color:#b85c38;}
+  .acc-item.open .acc-icon{transform:rotate(180deg);}
+  .acc-item.open .acc-content{display:block;}
+
+  .tip{
+    background:#f4f8ee;border-left:4px solid #6b8e4e;padding:12px 16px;
+    border-radius:0 10px 10px 0;font-size:13.5px;color:#4a5a3a;margin:22px 0 0;
+  }
+  .tip.warn{background:#fdf3ec;border-left-color:#c9764a;color:#7a4a2e;}
+
+  ul.clean{margin:10px 0 0;padding-left:20px;font-size:14px;}
+  ul.clean li{margin:6px 0;}
+
+  /* ====== 打卡与日历区域样式 ====== */
+  .checkin-section{
+    background:#fff;border-top:1px solid #e8ddd0;padding:36px 0;
+  }
+  .checkin-header{
+    text-align:center;margin-bottom:24px;
+  }
+  .checkin-status{
+    font-size:20px;font-weight:700;color:#b85c38;margin-bottom:8px;
+  }
+  .checkin-desc{
+    font-size:14px;color:#8a7b6c;margin-bottom:20px;
+  }
+  .checkin-btn{
+    background:#b85c38;color:#fff;border:none;
+    padding:12px 40px;border-radius:999px;font-size:16px;font-weight:600;
+    cursor:pointer;box-shadow:0 4px 12px rgba(184,92,56,0.3);
+    transition:.2s;font-family:inherit;
+  }
+  .checkin-btn:hover:not(:disabled){transform:translateY(-2px);box-shadow:0 6px 16px rgba(184,92,56,0.4);}
+  .checkin-btn.done{
+    background:#e0d2c2;color:#8a7b6c;box-shadow:none;cursor:not-allowed;transform:none;
+  }
+
+  /* 日历样式 */
+  .calendar-container{
+    max-width:380px;margin:0 auto;background:#fdfaf6;
+    border:1px solid #eee3d6;border-radius:16px;padding:20px;
+    box-shadow:0 2px 8px rgba(120,90,60,.04);
+  }
+  .cal-header{
+    display:flex;justify-content:space-between;align-items:center;
+    margin-bottom:16px;
+  }
+  .cal-header h3{
+    margin:0;font-size:17px;color:#4a3a2c;
+  }
+  .cal-nav-btn{
+    background:none;border:1px solid #e0d2c2;color:#b85c38;
+    width:32px;height:32px;border-radius:50%;cursor:pointer;
+    display:flex;align-items:center;justify-content:center;
+    font-size:16px;transition:.2s;
+  }
+  .cal-nav-btn:hover{background:#f2ebe1;}
+  
+  .cal-weekdays{
+    display:grid;grid-template-columns:repeat(7, 1fr);
+    text-align:center;font-size:13px;color:#8a7b6c;font-weight:600;
+    margin-bottom:8px;
+  }
+  .cal-days{
+    display:grid;grid-template-columns:repeat(7, 1fr);gap:4px;
+  }
+  .cal-day{
+    aspect-ratio:1;display:flex;align-items:center;justify-content:center;
+    font-size:14px;color:#3d3229;border-radius:8px;cursor:default;
+    position:relative;font-weight:500;
+  }
+  .cal-day.empty{color:transparent;background:none;}
+  .cal-day.today{
+    border:2px solid #b85c38;color:#b85c38;font-weight:700;
+  }
+  .cal-day.checked{
+    background:#6b8e4e;color:#fff;
+  }
+  .cal-day.checked::after{
+    content:'✓';position:absolute;bottom:-2px;right:2px;font-size:10px;
+    background:#fff;color:#6b8e4e;border-radius:50%;width:14px;height:14px;
+    display:flex;align-items:center;justify-content:center;font-weight:bold;
+  }
+  /* 针对今天且已打卡的情况，让绿色覆盖边框 */
+  .cal-day.today.checked{
+    border-color:#6b8e4e;
+  }
+
+  /* ====== 防误触弹窗样式 ====== */
+  .modal-overlay{
+    display:none;position:fixed;top:0;left:0;right:0;bottom:0;
+    background:rgba(0,0,0,0.5);z-index:1000;
+    align-items:center;justify-content:center;
+    backdrop-filter: blur(2px);
+  }
+  .modal-overlay.active{display:flex;}
+  .modal-box{
+    background:#fff;width:85%;max-width:320px;border-radius:16px;
+    padding:24px;text-align:center;box-shadow:0 10px 30px rgba(0,0,0,0.2);
+    animation:popIn .2s ease-out;
+  }
+  @keyframes popIn{from{transform:scale(0.9);opacity:0;}to{transform:scale(1);opacity:1;}}
+  .modal-title{font-size:18px;font-weight:700;color:#4a3a2c;margin-bottom:12px;}
+  .modal-text{font-size:14px;color:#8a7b6c;margin-bottom:24px;line-height:1.5;}
+  .modal-actions{display:flex;gap:12px;}
+  .modal-actions button{
+    flex:1;padding:12px;border-radius:10px;font-size:15px;font-weight:600;
+    cursor:pointer;border:none;font-family:inherit;transition:.18s;
+  }
+  .modal-cancel{background:#f2ebe1;color:#5c4d3e;}
+  .modal-cancel:hover{background:#e8ddd0;}
+  .modal-confirm{background:#b85c38;color:#fff;}
+  .modal-confirm:hover{background:#a04f2f;}
+
+  footer{
+    border-top:1px solid #e8ddd0;background:#faf6f0;padding:24px 0 40px;
+    font-size:12.5px;color:#9a8b7b;text-align:center;
+  }
+
+  @media (max-width:600px){
+    .day-grid{grid-template-columns:1fr;}
+    .tab{padding:12px 12px;font-size:14px;}
+    header{padding:26px 0 22px;}
+    .seg button{padding:7px 12px;font-size:13px;}
+    .acc-row strong{min-width:60px;}
+  }
+
+  /* 深色模式 */
+  @media (prefers-color-scheme: dark) {
+    body{background:#1c1c1e;color:#e5e5e5;}
+    header{background:linear-gradient(135deg,#5a2d1b 0%,#6b452f 55%,#645113 100%);}
+    .weekbar,.tabs,.day-card,.shop-list,.acc-item,.checkin-section,.calendar-container{background:#2c2c2e;border-color:#3a3a3c;}
+    .week-btn{background:#3a3a3c;border-color:#4a4a4c;color:#e5e5e5;}
+    .week-btn.active{background:#c9764a;border-color:#c9764a;color:#fff;}
+    .tab{color:#a0a0a0;}
+    .tab.active{color:#e59866;border-bottom-color:#e59866;}
+    h2.sec,.acc-header,.cal-header h3{color:#e5e5e5;}
+    .sec-sub,.weekbar-label{color:#a0a0a0;}
+    .shop-item{border-bottom-color:#3a3a3c;}
+    .shop-item span:first-child{color:#e5e5e5;}
+    .shop-item span:last-child{color:#e59866;}
+    .tip{background:#1e2618;border-left-color:#6b8e4e;color:#c5d4b3;}
+    .tip.warn{background:#2e1c14;border-left-color:#c9764a;color:#e8b59b;}
+    .btn,.acc-btn,.cal-nav-btn{background:#3a3a3c;border-color:#4a4a4c;color:#e59866;}
+    .cal-nav-btn:hover{background:#4a4a4c;}
+    .seg{background:#3a3a3c;}
+    .seg button{color:#a0a0a0;}
+    .seg button.active{background:#c9764a;color:#fff;}
+    .day-head{border-bottom-color:#4a4a4c;}
+    .meal-tag.b{background:#423c1f;color:#e5d495;}
+    .meal-tag.l{background:#422219;color:#f1ba9b;}
+    .meal-tag.d{background:#2a3a1e;color:#b8d6a0;}
+    .day-head .from{background:#4a2f23;color:#e59866;}
+    .acc-header{background:#2c2c2e;}
+    .acc-content{border-top-color:#3a3a3c;}
+    .acc-item.open .acc-header{background:#4a2f23;color:#e59866;}
+    .acc-row strong{color:#e5e5e5;}
+    
+    .checkin-btn.done{background:#3a3a3c;color:#a0a0a0;}
+    .modal-box{background:#2c2c2e;}
+    .modal-title{color:#e5e5e5;}
+    .modal-cancel{background:#3a3a3c;color:#e5e5e5;}
+    .modal-cancel:hover{background:#4a4a4c;}
+    
+    /* 日历深色 */
+    .cal-weekdays{color:#a0a0a0;}
+    .cal-day{color:#e5e5e5;}
+    .cal-day.empty{color:transparent;}
+    .cal-day.today{border-color:#e59866;color:#e59866;}
+    .cal-day.checked{background:#4a6d8c;color:#fff;}
+    .cal-day.checked::after{background:#2c2c2e;color:#a0c0e0;}
+    .cal-day.today.checked{border-color:#4a6d8c;}
+    
+    footer{background:#1c1c1e;border-top-color:#3a3a3c;}
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="wrap">
+    <h1>食动养元</h1>
+    <p class="sub">每周随机 7 天食谱 · 自动汇总采购 · 三段式力量进阶</p>
+  </div>
+</header>
+
+<div class="weekbar">
+  <div class="wrap">
+    <span class="weekbar-label">切换周次：</span>
+    <div class="weeks" id="weeks"></div>
+  </div>
+</div>
+
+<nav class="tabs">
+  <div class="wrap">
+    <button class="tab active" data-tab="diet">本周随机食谱</button>
+    <button class="tab" data-tab="exercise">锻炼方案</button>
+    <button class="tab" data-tab="shopping">采购清单</button>
+  </div>
+</nav>
+
+<main class="wrap">
+  <section id="panel-diet" class="panel active"></section>
+
+  <section id="panel-exercise" class="panel">
+    <h2 class="sec">三段式男性力量进阶</h2>
+    <p class="sec-sub">请选择当前所处阶段。点击任意条目可展开/收起详情。</p>
+
+    <div class="seg" id="exSeg">
+      <button data-ex="pre" class="active">过渡前（居家）</button>
+      <button data-ex="mid">过渡中（健身房适应）</button>
+      <button data-ex="post">过渡后（长期健身房）</button>
+    </div>
+
+    <div id="ex-pre">
+      <div class="acc-controls">
+        <button class="acc-btn" data-target="ex-pre" data-action="open">全部展开</button>
+        <button class="acc-btn" data-target="ex-pre" data-action="close">全部收起</button>
+      </div>
+      <div class="acc-item">
+        <div class="acc-header">居家 A 日：上肢与核心 <span class="acc-icon">▼</span></div>
+        <div class="acc-content">
+          <div class="acc-row"><strong>热身：</strong>原地开合跳 3 分钟 + 关节环绕</div>
+          <div class="acc-row"><strong>动作 1：</strong>标准/跪姿俯卧撑 3 组 × 10-15 次</div>
+          <div class="acc-row"><strong>动作 2：</strong>水瓶/弹力带划船 3 组 × 15 次</div>
+          <div class="acc-row"><strong>动作 3：</strong>平板支撑 3 组（每组坚持到力竭前 5 秒）</div>
+          <div class="acc-row"><strong>恢复：</strong>全身拉伸 5 分钟</div>
+        </div>
+      </div>
+      <div class="acc-item">
+        <div class="acc-header">居家 B 日：下肢与心肺 <span class="acc-icon">▼</span></div>
+        <div class="acc-content">
+          <div class="acc-row"><strong>热身：</strong>原地高抬腿 3 分钟</div>
+          <div class="acc-row"><strong>动作 1：</strong>自重深蹲 4 组 × 20 次（动作放慢）</div>
+          <div class="acc-row"><strong>动作 2：</strong>保加利亚单腿蹲（后脚搭沙发）3 组 × 10 次/腿</div>
+          <div class="acc-row"><strong>动作 3：</strong>臀桥 3 组 × 20 次</div>
+          <div class="acc-row"><strong>有氧：</strong>快走或慢跑 20-30 分钟（微汗即可）</div>
+        </div>
+      </div>
+      <div class="acc-item">
+        <div class="acc-header">居家 C 日：积极恢复 <span class="acc-icon">▼</span></div>
+        <div class="acc-content">
+          <div class="acc-row"><strong>内容：</strong>八段锦 1 遍，或全身瑜伽拉伸 15 分钟。</div>
+          <div class="acc-row"><strong>附加：</strong>睡前泡脚 15 分钟，促进气血回流。</div>
+        </div>
+      </div>
+      <div class="tip">
+        <strong>阶段目标：</strong>建议持续 4 周。前期不适合直接上大重量，居家阶段用自重和简单阻力唤醒神经和肌肉，提高心肺，同时固护脾胃。
+      </div>
+    </div>
+
+    <div id="ex-mid" style="display:none;">
+      <div class="acc-controls">
+        <button class="acc-btn" data-target="ex-mid" data-action="open">全部展开</button>
+        <button class="acc-btn" data-target="ex-mid" data-action="close">全部收起</button>
+      </div>
+      <div class="acc-item">
+        <div class="acc-header">Day 1：推（胸 / 肩 / 三头） <span class="acc-icon">▼</span></div>
+        <div class="acc-content">
+          <div class="acc-row"><strong>热身：</strong>跑步机坡度走 5-8 分钟</div>
+          <div class="acc-row"><strong>动作 1：</strong>坐姿推胸机 3 组 × 12 次（轻重量找发力感）</div>
+          <div class="acc-row"><strong>动作 2：</strong>哑铃坐姿推举 3 组 × 12 次（最轻哑铃，练肩）</div>
+          <div class="acc-row"><strong>动作 3：</strong>绳索下压 3 组 × 15 次（练手臂）</div>
+          <div class="acc-row"><strong>有氧：</strong>椭圆机 15 分钟</div>
+        </div>
+      </div>
+      <div class="acc-item">
+        <div class="acc-header">Day 2：拉（背 / 二头） <span class="acc-icon">▼</span></div>
+        <div class="acc-content">
+          <div class="acc-row"><strong>热身：</strong>划船机 5 分钟</div>
+          <div class="acc-row"><strong>动作 1：</strong>高位下拉机 3 组 × 12 次（感受背部收缩）</div>
+          <div class="acc-row"><strong>动作 2：</strong>坐姿划船机 3 组 × 12 次（挺胸收腹）</div>
+          <div class="acc-row"><strong>动作 3：</strong>哑铃交替弯举 3 组 × 12 次</div>
+          <div class="acc-row"><strong>有氧：</strong>跑步机慢跑 15 分钟</div>
+        </div>
+      </div>
+      <div class="acc-item">
+        <div class="acc-header">Day 3：腿（下肢） <span class="acc-icon">▼</span></div>
+        <div class="acc-content">
+          <div class="acc-row"><strong>热身：</strong>动感单车 5 分钟</div>
+          <div class="acc-row"><strong>动作 1：</strong>倒蹬机（腿举）3 组 × 12 次（对腰椎安全）</div>
+          <div class="acc-row"><strong>动作 2：</strong>坐姿腿屈伸 3 组 × 15 次</div>
+          <div class="acc-row"><strong>动作 3：</strong>俯卧腿弯举 3 组 × 15 次</div>
+          <div class="acc-row"><strong>有氧：</strong>走步机慢走 10 分钟排酸</div>
+        </div>
+      </div>
+      <div class="tip">
+        <strong>阶段目标：</strong>建议持续 4 周。进入健身房不碰大重量杠铃，主用固定器械学习动作轨迹，建立“念动一致”，避免受伤。
+      </div>
+    </div>
+
+    <div id="ex-post" style="display:none;">
+      <div class="acc-controls">
+        <button class="acc-btn" data-target="ex-post" data-action="open">全部展开</button>
+        <button class="acc-btn" data-target="ex-post" data-action="close">全部收起</button>
+      </div>
+      <div class="acc-item">
+        <div class="acc-header">训练日 1：推（胸 / 肩 / 三头） <span class="acc-icon">▼</span></div>
+        <div class="acc-content">
+          <div class="acc-row"><strong>核心动作：</strong>杠铃平板卧推 4 组 × 8-10 次（逐渐加重）</div>
+          <div class="acc-row"><strong>上胸塑造：</strong>上斜哑铃卧推 3 组 × 10 次</div>
+          <div class="acc-row"><strong>肩部力量：</strong>站姿杠铃推举 3 组 × 10 次（收紧核心）</div>
+          <div class="acc-row"><strong>细节打磨：</strong>哑铃侧平举 3 组 × 15 次（三角肌中束）</div>
+        </div>
+      </div>
+      <div class="acc-item">
+        <div class="acc-header">训练日 2：拉（背 / 二头） <span class="acc-icon">▼</span></div>
+        <div class="acc-content">
+          <div class="acc-row"><strong>核心动作：</strong>引体向上 3 组做到力竭（可用助力带）</div>
+          <div class="acc-row"><strong>背部厚度：</strong>杠铃俯身划船 4 组 × 8-10 次（腰背挺直）</div>
+          <div class="acc-row"><strong>单侧孤立：</strong>单臂哑铃划船 3 组 × 12 次/侧</div>
+          <div class="acc-row"><strong>手臂：</strong>杠铃弯举 3 组 × 10 次</div>
+        </div>
+      </div>
+      <div class="acc-item">
+        <div class="acc-header">训练日 3：腿（大腿 / 后侧） <span class="acc-icon">▼</span></div>
+        <div class="acc-content">
+          <div class="acc-row"><strong>核心动作：</strong>杠铃深蹲 4 组 × 8-10 次（深蹲架保护）</div>
+          <div class="acc-row"><strong>后链爆发：</strong>罗马尼亚硬拉 4 组 × 10 次（练大腿后侧和臀）</div>
+          <div class="acc-row"><strong>股四头肌：</strong>倒蹬机 3 组 × 12 次</div>
+          <div class="acc-row"><strong>小腿：</strong>坐姿提踵 4 组 × 15 次</div>
+        </div>
+      </div>
+      <div class="acc-item">
+        <div class="acc-header">训练日 4：全身 / 弱项强化（可选） <span class="acc-icon">▼</span></div>
+        <div class="acc-content">
+          <div class="acc-row"><strong>内容：</strong>针对薄弱环节（腹肌悬垂举腿、小臂抓握）或打沙袋。</div>
+          <div class="acc-row"><strong>有氧：</strong>力量训练后，进行 20 分钟坡度走或慢跑（降脂强心）。</div>
+        </div>
+      </div>
+      <div class="tip warn">
+        <strong>气血红线：</strong>绝不冲只能做 1 次的极限重量；憋气容易导致脑供血不足；练后半小时内必须补充碳水（香蕉/米饭）+ 蛋白质（牛肉/鸡肉/蛋白粉），实现“以水谷精微化生气血”。
+      </div>
+    </div>
+  </section>
+
+  <section id="panel-shopping" class="panel"></section>
+</main>
+
+<!-- ====== 打卡与日历区域 ====== -->
+<section class="checkin-section">
+  <div class="wrap">
+    <div class="checkin-header">
+      <div class="checkin-status" id="checkinStatus">本月还未开始打卡</div>
+      <div class="checkin-desc" id="checkinDesc">按方案执行，见证改变</div>
+      <button class="checkin-btn" id="checkinBtn">今日打卡</button>
+    </div>
+
+    <div class="calendar-container">
+      <div class="cal-header">
+        <button class="cal-nav-btn" id="prevMonth">&lt;</button>
+        <h3 id="calMonthTitle">202X年X月</h3>
+        <button class="cal-nav-btn" id="nextMonth">&gt;</button>
+      </div>
+      <div class="cal-weekdays">
+        <div>一</div><div>二</div><div>三</div><div>四</div><div>五</div><div>六</div><div>日</div>
+      </div>
+      <div class="cal-days" id="calDays"></div>
+    </div>
+  </div>
+</section>
+
+<!-- ====== 防误触弹窗 ====== -->
+<div class="modal-overlay" id="checkinModal">
+  <div class="modal-box">
+    <div class="modal-title">确认打卡</div>
+    <div class="modal-text" id="modalDateText">今天是 202X年X月X日</div>
+    <div class="modal-text" style="font-size:13px;color:#b85c38;margin-bottom:20px;">
+      请确认今日已严格按照食谱进食并完成锻炼。
+    </div>
+    <div class="modal-actions">
+      <button class="modal-cancel" id="modalCancel">取消</button>
+      <button class="modal-confirm" id="modalConfirm">确认打卡</button>
+    </div>
+  </div>
+</div>
+
+<footer>
+  <div class="wrap">
+    本计划为日常食养与运动参考，不替代医疗建议。若持续头晕、心悸、面色萎黄或严重疲乏，请先查血常规与甲状腺功能，遵医嘱调整饮食与运动强度。
+  </div>
+</footer>
+
+<script>
+// 食谱池数据
+const RECIPES = [
+  {id:'A1', plan:'A', b:'燕麦粥 + 水煮蛋 + 凉拌海带', l:'鸭血烧豆腐 + 蒜蓉油菜 + 杂粮饭', d:'南瓜小米粥 + 香菇蒸鸡块 + 焯菠菜', ing:{鸡蛋:1,杂粮:150,干木耳海带:10,鸭血鸡血:100,豆腐:0.5,蔬菜:350,鸡肉:150}},
+  {id:'A2', plan:'A', b:'燕麦豆浆粥 + 全麦馒头半个 + 鸡蛋', l:'瘦猪肉炒萝卜 + 清炒小白菜 + 杂粮饭', d:'南瓜粥 + 卤鸡腿（去皮）+ 焯菠菜', ing:{鸡蛋:1,杂粮:120,黄豆:25,全麦馒头:0.5,瘦猪肉:100,蔬菜:500,鸡肉:150,大米:30,薯类:150}},
+  {id:'A3', plan:'A', b:'小米南瓜粥 + 水煮蛋 + 焯菠菜 + 红枣 2 颗', l:'瘦猪肉炒洋葱 + 清炒南瓜 + 杂粮饭', d:'小米粥 + 豆腐蒸蛋 + 焯油菜', ing:{鸡蛋:2,杂粮:70,薯类:250,蔬菜:350,瘦猪肉:100,红枣:2,豆腐:0.5}},
+  {id:'A4', plan:'A', b:'玉米 + 豆浆 + 水煮蛋', l:'韭菜炒鸡血 + 香菇青菜 + 米饭', d:'山药木耳炒鸡胸 + 小米粥', ing:{鸡蛋:1,黄豆:25,薯类:150,鸭血鸡血:100,蔬菜:150,大米:80,干木耳海带:10,鸡肉:100,杂粮:40}},
+  {id:'B1', plan:'B', b:'小米南瓜粥 + 水煮蛋 + 红枣 2 颗', l:'番茄炒蛋（少油）+ 清炒油菜 + 米饭', d:'豆腐白菜汤 + 蒸红薯 + 凉拌木耳', ing:{鸡蛋:2,杂粮:40,薯类:250,蔬菜:450,大米:80,豆腐:0.5,干木耳海带:10,红枣:2}},
+  {id:'B2', plan:'B', b:'瘦猪肉末青菜粥 + 蒸山药', l:'猪肝炒彩椒（猪肝 50g）+ 清炒油菜 + 米饭', d:'瘦肉萝卜丝汤 + 蒸红薯 + 凉拌木耳', ing:{瘦猪肉:100,蔬菜:550,大米:130,薯类:300,猪肝:50,干木耳海带:10}},
+  {id:'B3', plan:'B', b:'全麦馒头半个 + 豆浆 + 鸡蛋', l:'瘦猪肉末炒木耳 + 番茄炒蛋 + 米饭', d:'山药排骨汤（去油）+ 凉拌黄瓜 + 少量米饭', ing:{全麦馒头:0.5,黄豆:25,鸡蛋:2,瘦猪肉:100,干木耳海带:10,蔬菜:250,大米:120,薯类:150,排骨:150}},
+  {id:'B4', plan:'B', b:'黑米粥 + 豆腐脑（少卤）+ 焯青菜', l:'香菇滑鸡 + 清炒当季青菜 + 米饭', d:'南瓜燕麦粥 + 番茄炒蛋（少油）+ 焯白菜', ing:{杂粮:70,豆腐:0.5,蔬菜:650,鸡肉:150,大米:80,薯类:150,鸡蛋:1}},
+  {id:'C1', plan:'C', b:'红薯 + 豆浆 + 水煮蛋', l:'猪肝炒菠菜（猪肝 50g）+ 清炒萝卜丝 + 米饭', d:'小米粥 + 鸡胸肉丝拌黄瓜 + 焯小白菜', ing:{薯类:150,黄豆:25,鸡蛋:1,猪肝:50,蔬菜:600,大米:80,杂粮:40,鸡肉:100}},
+  {id:'C2', plan:'C', b:'红豆小米粥 + 鸡蛋 + 凉拌黄瓜木耳', l:'鸡胸炒彩椒 + 清炒油菜 + 米饭', d:'莲藕排骨汤（去油）+ 焯青菜 + 少量米饭', ing:{杂粮:50,鸡蛋:1,蔬菜:700,干木耳海带:10,鸡肉:100,大米:120,排骨:150}},
+  {id:'C3', plan:'C', b:'玉米 + 豆浆 + 鸡蛋 + 凉拌海带', l:'番茄鸡片 + 清炒小白菜 + 米饭', d:'鸡肉香菇汤 + 清炒小白菜 + 小半碗米饭', ing:{薯类:150,黄豆:25,鸡蛋:1,干木耳海带:10,蔬菜:500,鸡肉:200,大米:120}},
+  {id:'C4', plan:'C', b:'全麦三明治（蛋、生菜、番茄）+ 豆浆', l:'番茄炒蛋 + 清炒蘑菇 + 米饭', d:'莲子山药鸡汤（去油）+ 清炒生菜 + 少量米饭', ing:{全麦馒头:0.5,鸡蛋:2,蔬菜:430,黄豆:25,杂粮:50,水果:0.5,薯类:100,鸡肉:100,大米:100}},
+  {id:'D1', plan:'D', b:'小米红枣粥 + 鸡蛋 + 小番茄', l:'青椒瘦猪肉丝 + 清炒菠菜 + 米饭', d:'红薯粥 + 虾皮蒸蛋 + 焯油菜', ing:{杂粮:40,红枣:2,鸡蛋:2,水果:0.5,蔬菜:450,瘦猪肉:100,大米:100,薯类:100}},
+  {id:'D2', plan:'D', b:'紫薯 + 豆浆 + 水煮蛋', l:'洋葱炒牛肉末（牛肉少量）+ 山药炒木耳 + 米饭', d:'百合银耳羹（少糖）+ 鸡蛋羹 + 焯白菜', ing:{薯类:150,黄豆:25,鸡蛋:2,牛肉:50,蔬菜:250,干木耳海带:20,大米:80}},
+  {id:'D3', plan:'D', b:'山药南瓜糊 + 少油鸡蛋饼', l:'家常豆腐 + 清炒鸡胸 + 米饭', d:'瘦肉冬瓜汤 + 凉拌海带 + 小半碗米饭', ing:{薯类:200,鸡蛋:1,杂粮:30,蔬菜:300,豆腐:0.5,鸡肉:100,大米:120,瘦猪肉:50,干木耳海带:10}},
+  {id:'D4', plan:'D', b:'山药莲子羹 + 水煮蛋 + 橙子半个', l:'韭菜炒鸭血 + 凉拌菠菜 + 全麦馒头半个', d:'山药胡萝卜炖鸡块（少量）+ 凉拌黄瓜', ing:{薯类:100,鸡蛋:1,水果:0.5,鸭血鸡血:100,杂粮:50,蔬菜:400,全麦馒头:0.5,鸡肉:100}}
+];
+
+let currentWeek = 1;
+const reseed = {1:0, 2:0, 3:0, 4:0};
+
+/* ==================== 打卡与日历逻辑 ==================== */
+let checkinData = {};
+try {
+  checkinData = JSON.parse(localStorage.getItem('checkinData')) || {};
+} catch(e) {}
+
+let currentCalDate = new Date(); // 当前日历显示的年月
+
+function getTodayString() {
+  const d = new Date();
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+}
+
+function getChineseDate() {
+  const d = new Date();
+  return `${d.getFullYear()}年${d.getMonth() + 1}月${d.getDate()}日`;
+}
+
+// 渲染日历
+function renderCalendar() {
+  const year = currentCalDate.getFullYear();
+  const month = currentCalDate.getMonth(); // 0-11
+  
+  document.getElementById('calMonthTitle').textContent = `${year}年${month + 1}月`;
+  
+  const firstDay = new Date(year, month, 1);
+  const lastDay = new Date(year, month + 1, 0);
+  const totalDays = lastDay.getDate();
+  
+  // getDay(): 0是周日，1-6是周一到周六。我们需要调整为周一为第一列
+  let startDayOfWeek = firstDay.getDay();
+  if (startDayOfWeek === 0) startDayOfWeek = 7; // 将周日转为7
+  
+  const todayStr = getTodayString();
+  
+  let html = '';
+  
+  // 填充前面的空白
+  for (let i = 1; i < startDayOfWeek; i++) {
+    html += `<div class="cal-day empty"></div>`;
+  }
+  
+  // 填充日期
+  for (let i = 1; i <= totalDays; i++) {
+    const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(i).padStart(2, '0')}`;
+    const isToday = (dateStr === todayStr);
+    const isChecked = checkinData[dateStr];
+    
+    let classes = 'cal-day';
+    if (isToday) classes += ' today';
+    if (isChecked) classes += ' checked';
+    
+    html += `<div class="${classes}" data-date="${dateStr}">${i}</div>`;
+  }
+  
+  document.getElementById('calDays').innerHTML = html;
+}
+
+// 更新打卡状态和按钮
+function updateCheckinStatus() {
+  const todayStr = getTodayString();
+  const now = new Date();
+  const currentMonthStr = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
+  
+  // 统计本月打卡天数
+  let monthCount = 0;
+  for (let date in checkinData) {
+    if (date.startsWith(currentMonthStr) && checkinData[date]) {
+      monthCount++;
+    }
+  }
+  
+  const passedDays = now.getDate();
+  const statusEl = document.getElementById('checkinStatus');
+  const descEl = document.getElementById('checkinDesc');
+  const btnEl = document.getElementById('checkinBtn');
+  
+  // 判定标准：本月打卡天数 >= 本月已过去的天数 - 1（允许漏打1天）
+  let isStrict = monthCount >= passedDays - 1;
+  
+  if (monthCount === 0) {
+    statusEl.textContent = '本月还未开始打卡';
+    descEl.textContent = '按方案执行，见证改变';
+  } else {
+    statusEl.textContent = isStrict ? '✅ 本月已严格执行' : '💪 本月还有提升空间';
+    descEl.textContent = `本月已打卡 ${monthCount} 天（今天已是本月第 ${passedDays} 天）`;
+  }
+  
+  if (checkinData[todayStr]) {
+    btnEl.textContent = '今日已打卡';
+    btnEl.classList.add('done');
+    btnEl.disabled = true;
+  } else {
+    btnEl.textContent = '今日打卡';
+    btnEl.classList.remove('done');
+    btnEl.disabled = false;
+  }
+}
+
+// 唤起打卡弹窗
+function showModal() {
+  if (checkinData[getTodayString()]) return;
+  document.getElementById('modalDateText').textContent = `今天是 ${getChineseDate()}`;
+  document.getElementById('checkinModal').classList.add('active');
+}
+
+// 日期点击事件（仅当点击的是今天且未打卡时唤起）
+document.getElementById('calDays').addEventListener('click', (e) => {
+  const dayEl = e.target.closest('.cal-day');
+  if (!dayEl || dayEl.classList.contains('empty')) return;
+  
+  const dateStr = dayEl.dataset.date;
+  const todayStr = getTodayString();
+  
+  if (dateStr === todayStr) {
+    showModal();
+  }
+});
+
+// 打卡按钮
+document.getElementById('checkinBtn').addEventListener('click', showModal);
+
+// 取消弹窗
+document.getElementById('modalCancel').addEventListener('click', () => {
+  document.getElementById('checkinModal').classList.remove('active');
+});
+
+// 确认打卡
+document.getElementById('modalConfirm').addEventListener('click', () => {
+  const todayStr = getTodayString();
+  checkinData[todayStr] = true;
+  localStorage.setItem('checkinData', JSON.stringify(checkinData));
+  document.getElementById('checkinModal').classList.remove('active');
+  
+  // 更新UI
+  updateCheckinStatus();
+  renderCalendar();
+});
+
+// 点击遮罩层关闭弹窗
+document.getElementById('checkinModal').addEventListener('click', (e) => {
+  if (e.target === document.getElementById('checkinModal')) {
+    document.getElementById('checkinModal').classList.remove('active');
+  }
+});
+
+// 切换月份
+document.getElementById('prevMonth').addEventListener('click', () => {
+  currentCalDate.setMonth(currentCalDate.getMonth() - 1);
+  renderCalendar();
+});
+
+document.getElementById('nextMonth').addEventListener('click', () => {
+  currentCalDate.setMonth(currentCalDate.getMonth() + 1);
+  renderCalendar();
+});
+
+
+/* ==================== 食谱与锻炼渲染逻辑 ==================== */
+function mulberry32(a){
+  return function(){
+    a |= 0; a = a + 0x6D2B79F5 | 0;
+    let t = Math.imul(a ^ a >>> 15, 1 | a);
+    t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t;
+    return ((t ^ t >>> 14) >>> 0) / 4294967296;
+  };
+}
+function shuffle(arr, rand){
+  const a = [...arr];
+  for(let i = a.length - 1; i > 0; i--){
+    const j = Math.floor(rand() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+function getWeekRecipes(week){
+  const rand = mulberry32(week * 10007 + reseed[week] * 7919 + 13);
+  return shuffle(RECIPES, rand).slice(0, 7);
+}
+
+function renderWeekButtons(){
+  document.getElementById('weeks').innerHTML = [1,2,3,4].map(w =>
+    `<button class="week-btn${w === currentWeek ? ' active' : ''}" data-week="${w}">第 ${w} 周</button>`
+  ).join('');
+}
+
+function renderDiet(){
+  const days = getWeekRecipes(currentWeek);
+  let html = `
+    <h2 class="sec">第 ${currentWeek} 周 · 随机 7 天食谱</h2>
+    <p class="sec-sub">每周从 16 天食谱池中随机抽取 7 天，不重复；采购清单按这 7 天自动汇总。点“换一批”可重新随机本周。</p>
+    <div class="randbar">
+      <button class="btn" id="reseedBtn">换一批本周食谱</button>
+    </div>
+    <div class="day-grid">
+  `;
+
+  days.forEach((m, i) => {
+    html += `
+      <article class="day-card">
+        <div class="day-head">
+          <span>第 ${i + 1} 天</span>
+          <span class="from">方案 ${m.plan}</span>
+        </div>
+        <div class="meal"><span class="meal-tag b">早</span><p>${m.b}</p></div>
+        <div class="meal"><span class="meal-tag l">午</span><p>${m.l}</p></div>
+        <div class="meal"><span class="meal-tag d">晚</span><p>${m.d}</p></div>
+      </article>`;
+  });
+
+  html += `
+    </div>
+    <div class="tip">
+      <strong>份量参考：</strong>男生主食每餐可约 1—1.5 拳头，蛋白 1—1.5 掌心，蔬菜 2 拳头。猪肝每次约 50g、每周 1—2 次；鸭血 / 鸡血每周 1—2 次。加餐可选红枣 2 颗、坚果一小把或无糖酸奶。
+    </div>
+    <div class="tip warn">
+      <strong>吸收小贴士：</strong>补铁餐配番茄、彩椒、橙子等维生素 C 食物；不要和浓茶、咖啡同餐。肉汤去浮油，少油炸，多蒸煮炖。
+    </div>
+  `;
+
+  document.getElementById('panel-diet').innerHTML = html;
+
+  document.getElementById('reseedBtn').addEventListener('click', () => {
+    reseed[currentWeek]++;
+    renderDiet();
+    renderShopping();
+  });
+}
+
+const CATS = [
+  {key:'鸡蛋', unit:'个', name:'鸡蛋'},
+  {key:'黄豆', unit:'g', name:'黄豆（自制豆浆）'},
+  {key:'大米', unit:'g', name:'大米'},
+  {key:'杂粮', unit:'g', name:'杂粮（小米 / 燕麦 / 黑米 / 红豆）'},
+  {key:'全麦馒头', unit:'个', name:'全麦馒头 / 面包'},
+  {key:'薯类', unit:'g', name:'红薯 / 紫薯 / 南瓜 / 山药 / 玉米'},
+  {key:'瘦猪肉', unit:'g', name:'瘦猪肉'},
+  {key:'牛肉', unit:'g', name:'牛肉'},
+  {key:'鸡肉', unit:'g', name:'鸡肉（胸 / 腿 / 块）'},
+  {key:'猪肝', unit:'g', name:'猪肝'},
+  {key:'鸭血鸡血', unit:'g', name:'鸭血 / 鸡血'},
+  {key:'排骨', unit:'g', name:'排骨'},
+  {key:'豆腐', unit:'盒', name:'豆腐'},
+  {key:'蔬菜', unit:'g', name:'蔬菜总量'},
+  {key:'水果', unit:'个', name:'水果'},
+  {key:'红枣', unit:'颗', name:'红枣'},
+  {key:'干木耳海带', unit:'g', name:'干木耳 / 干海带'}
+];
+
+function fmtAmount(v, unit){
+  if(v <= 0) return '—';
+  if(unit === 'g'){
+    return v >= 1000 ? (v / 1000).toFixed(1).replace(/\.0$/, '') + ' kg' : Math.round(v) + ' g';
+  }
+  if(unit === '盒' || unit === '个'){
+    return (Number.isInteger(v) ? v : v.toFixed(1)) + ' ' + unit;
+  }
+  return Math.round(v) + ' ' + unit;
+}
+
+function aggregate(days){
+  const t = {};
+  days.forEach(d => {
+    for(const [k, v] of Object.entries(d.ing)){
+      t[k] = (t[k] || 0) + v;
+    }
+  });
+  return t;
+}
+
+function renderShopping(){
+  const days = getWeekRecipes(currentWeek);
+  const totals = aggregate(days);
+
+  let rows = '';
+  CATS.forEach(c => {
+    const v = totals[c.key] || 0;
+    rows += `<div class="shop-item"><span>${c.name}</span><span>${fmtAmount(v, c.unit)}</span></div>`;
+  });
+
+  let dayList = days.map((d, i) =>
+    `<li>第 ${i + 1} 天（方案 ${d.plan}）：${d.b} / ${d.l} / ${d.d}</li>`
+  ).join('');
+
+  document.getElementById('panel-shopping').innerHTML = `
+    <h2 class="sec">第 ${currentWeek} 周 · 采购清单</h2>
+    <p class="sec-sub">按本周随机抽出的 7 天食谱自动汇总，单人份。两人同吃整体 ×2。</p>
+
+    <div class="shop-list">
+      ${rows}
+    </div>
+
+    <h3 class="plan-title">本周抽取的 7 天</h3>
+    <ul class="clean">${dayList}</ul>
+
+    <div class="tip">
+      蔬菜按“叶菜 + 根茎瓜果”搭配买，便宜且耐放。肉量嫌多可减 10%—20%，用豆腐和鸡蛋补足蛋白。菜价高时：鸡胸换鸡腿去皮，瘦猪肉换鸡胸，西兰花换当季青菜。
+    </div>
+  `;
+}
+
+document.querySelectorAll('.tab').forEach(tab => {
+  tab.addEventListener('click', () => {
+    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+    document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+    tab.classList.add('active');
+    document.getElementById('panel-' + tab.dataset.tab).classList.add('active');
+
+    const needWeek = ['diet', 'shopping'].includes(tab.dataset.tab);
+    document.querySelector('.weekbar').style.display = needWeek ? '' : 'none';
+
+    window.scrollTo({top:0, behavior:'smooth'});
+  });
+});
+
+document.querySelectorAll('#exSeg button').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('#exSeg button').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    
+    const target = btn.dataset.ex;
+    ['pre', 'mid', 'post'].forEach(type => {
+      document.getElementById('ex-' + type).style.display = (type === target) ? '' : 'none';
+    });
+  });
+});
+
+document.querySelectorAll('.acc-header').forEach(header => {
+  header.addEventListener('click', () => {
+    header.parentElement.classList.toggle('open');
+  });
+});
+
+document.querySelectorAll('.acc-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    const targetId = btn.dataset.target;
+    const action = btn.dataset.action;
+    const container = document.getElementById(targetId);
+    const items = container.querySelectorAll('.acc-item');
+    
+    items.forEach(item => {
+      if(action === 'open'){
+        item.classList.add('open');
+      } else {
+        item.classList.remove('open');
+      }
+    });
+  });
+});
+
+document.getElementById('weeks').addEventListener('click', e => {
+  const btn = e.target.closest('.week-btn');
+  if(!btn) return;
+  currentWeek = Number(btn.dataset.week);
+  renderWeekButtons();
+  renderDiet();
+  renderShopping();
+});
+
+// 初始化所有
+renderWeekButtons();
+renderDiet();
+renderShopping();
+updateCheckinStatus();
+renderCalendar();
+</script>
+</body>
+  </html>
